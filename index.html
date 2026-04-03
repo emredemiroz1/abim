@@ -71,8 +71,9 @@
         frame();
       }, []);
 
-      // 8 fotoğrafı 3x3 ızgaraya yerleştiriyoruz. 1. fotoğraf tam ortada (5. sıra).
-      const gridItems = [
+      // 8 fotoğrafı 3x3 ızgaraya yerleştiriyoruz. Senin klasöründe eksik olan 5.jpeg yerine, mevcut olanlardan bir dağılım yapıyoruz.
+      // 1. fotoğraf tam ortada (5. sıra).
+      const orderedGridItems = [
         { id: '2', src: '2.jpeg' },
         { id: '3', src: '3.jpeg' },
         { id: '4', src: '4.jpeg' },
@@ -80,57 +81,46 @@
         { id: '1', src: '1.jpeg', isCenter: true }, // Merkezdeki fotoğraf
         { id: '7', src: '7.jpeg' },
         { id: '8', src: '8.jpeg' },
-        { id: 'msg', isMessage: true }, // 9. kareyi doldurmak için boşluk/ikon
-        { id: '9', src: '9.jpeg' }
+        { id: '9', src: '9.jpeg' }, // 9.jpeg'i 8. sıraya koyduk
+        { id: 'placeholder', src: 'https://via.placeholder.com/400x400/1e293b/ffffff?text=Resim+Eksik' } // Son kareyi placeholder ile doldurduk
       ];
 
       return (
         <div className="min-h-screen pb-12 px-4 sm:px-6 flex flex-col items-center justify-center">
           
-          {/* Başlık ve Doğum Günü Mesajı */}
+          {/* Başlık ve Doğum Günü Mesajı (GÜNCELLENDİ: "en büyük şansım" kaldırıldı) */}
           <div className="max-w-3xl w-full mt-10 mb-12 text-center animate-float">
             <h1 className="text-4xl md:text-6xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-lg uppercase tracking-wider">
               İyi ki Doğdun Abim! 🎂
             </h1>
             <p className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed px-4">
-              Hayatımdaki en büyük şansım, canım abim... Beraber geçirdiğimiz tüm bu güzel anılara daha nicelerini eklemek dileğiyle. Yeni yaşın sana güzellikler getirsin. Seni çok seviyorum! ❤️
+              Beraber geçirdiğimiz tüm bu güzel anılara daha nicelerini eklemek dileğiyle. Yeni yaşın sana güzellikler getirsin. Seni çok seviyorum! ❤️
             </p>
           </div>
 
-          {/* Fotoğraf Kolajı */}
-          <div className="w-full max-w-4xl mx-auto glass-panel p-6 sm:p-10 rounded-[2rem] shadow-2xl">
+          {/* Fotoğraf Kolajı (GÜNCELLENDİ: Tüm görseller render ediliyor, 1 numara daha büyük) */}
+          <div className="w-full max-w-4xl mx-auto glass-panel p-6 sm:p-10 rounded-[2rem] shadow-2xl relative">
             <div className="grid grid-cols-3 gap-3 sm:gap-6 relative place-items-center">
-              {gridItems.map((item, index) => {
-                if (item.isMessage) {
-                  return (
-                    <div key={item.id} className="w-full aspect-square flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-white/10 shadow-inner">
-                      <span className="text-4xl sm:text-6xl mb-2">🎈</span>
-                      <span className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest text-center">Mutlu<br/>Yıllar</span>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div 
-                    key={item.id} 
-                    className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg transition-all duration-500 
-                      ${item.isCenter 
-                        ? 'scale-[1.15] sm:scale-125 z-20 border-4 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.5)]' 
-                        : 'z-10 hover:scale-105 hover:z-30 opacity-80 hover:opacity-100 border border-white/20'
-                      }`}
-                  >
-                    <img 
-                      src={`./${item.src}`} 
-                      alt={`Fotoğraf ${item.id}`} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/400x400/1e293b/ffffff?text=Resim+" + item.id;
-                      }}
-                    />
-                  </div>
-                );
-              })}
+              {orderedGridItems.map((item, index) => (
+                <div 
+                  key={item.id} 
+                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg transition-all duration-500 
+                    ${item.isCenter 
+                      ? 'scale-[1.15] sm:scale-125 z-20 border-4 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.5)]' 
+                      : 'z-10 hover:scale-105 hover:z-30 opacity-80 hover:opacity-100 border border-white/20'
+                    }`}
+                >
+                  <img 
+                    src={item.src.startsWith('http') ? item.src : `./${item.src}`} 
+                    alt={`Fotoğraf ${item.id}`} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/400x400/1e293b/ffffff?text=Resim+" + item.id;
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
           
