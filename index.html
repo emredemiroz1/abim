@@ -40,55 +40,64 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useEffect } = React;
+    const { useEffect, useState } = React;
 
     function App() {
-      // Sayfa yüklendiğinde konfeti patlatma efekti
+      const [isPlaying, setIsPlaying] = useState(false);
+
       useEffect(() => {
         const duration = 3000;
         const end = Date.now() + duration;
 
         const frame = () => {
-          confetti({
-            particleCount: 5,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 },
-            colors: ['#fbbf24', '#f87171', '#60a5fa']
-          });
-          confetti({
-            particleCount: 5,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 },
-            colors: ['#fbbf24', '#f87171', '#60a5fa']
-          });
-
-          if (Date.now() < end) {
-            requestAnimationFrame(frame);
-          }
+          confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#fbbf24', '#f87171', '#60a5fa'] });
+          confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#fbbf24', '#f87171', '#60a5fa'] });
+          if (Date.now() < end) requestAnimationFrame(frame);
         };
         frame();
       }, []);
 
-      // 8 fotoğrafı 3x3 ızgaraya yerleştiriyoruz. Senin klasöründe eksik olan 5.jpeg yerine, mevcut olanlardan bir dağılım yapıyoruz.
-      // 1. fotoğraf tam ortada (5. sıra).
+      const toggleMusic = () => {
+        setIsPlaying(!isPlaying);
+      };
+
       const orderedGridItems = [
         { id: '2', src: '2.jpeg' },
         { id: '3', src: '3.jpeg' },
         { id: '4', src: '4.jpeg' },
         { id: '6', src: '6.jpeg' },
-        { id: '1', src: '1.jpeg', isCenter: true }, // Merkezdeki fotoğraf
+        { id: '1', src: '1.jpeg', isCenter: true }, 
         { id: '7', src: '7.jpeg' },
         { id: '8', src: '8.jpeg' },
-        { id: '9', src: '9.jpeg' }, // 9.jpeg'i 8. sıraya koyduk
-        { id: 'placeholder', src: 'https://via.placeholder.com/400x400/1e293b/ffffff?text=Resim+Eksik' } // Son kareyi placeholder ile doldurduk
+        { id: '9', src: '9.jpeg' },
+        { id: '10', src: '10.jpeg' }
       ];
 
       return (
-        <div className="min-h-screen pb-12 px-4 sm:px-6 flex flex-col items-center justify-center">
+        <div className="min-h-screen pb-12 px-4 sm:px-6 flex flex-col items-center justify-center relative">
           
-          {/* Başlık ve Doğum Günü Mesajı (GÜNCELLENDİ: "en büyük şansım" kaldırıldı) */}
+          {/* Görünmez YouTube Oynatıcı */}
+          <div style={{ display: 'none' }}>
+            {isPlaying && (
+              <iframe 
+                width="10" 
+                height="10" 
+                src="https://www.youtube.com/embed/eaEf7zTThX4?autoplay=1&loop=1&playlist=eaEf7zTThX4" 
+                allow="autoplay" 
+              />
+            )}
+          </div>
+
+          <button 
+            onClick={toggleMusic}
+            className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full border shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+              isPlaying ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+            }`}
+          >
+            <span className={`text-xl ${isPlaying ? 'animate-bounce' : ''}`}>{isPlaying ? '🎵' : '🔇'}</span>
+            <span className="font-bold text-sm tracking-wider uppercase">{isPlaying ? 'Müziği Kapat' : 'Müziği Aç'}</span>
+          </button>
+
           <div className="max-w-3xl w-full mt-10 mb-12 text-center animate-float">
             <h1 className="text-4xl md:text-6xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-lg uppercase tracking-wider">
               İyi ki Doğdun Abim! 🎂
@@ -98,27 +107,30 @@
             </p>
           </div>
 
-          {/* Fotoğraf Kolajı (GÜNCELLENDİ: Tüm görseller render ediliyor, 1 numara daha büyük) */}
           <div className="w-full max-w-4xl mx-auto glass-panel p-6 sm:p-10 rounded-[2rem] shadow-2xl relative">
             <div className="grid grid-cols-3 gap-3 sm:gap-6 relative place-items-center">
-              {orderedGridItems.map((item, index) => (
+              {orderedGridItems.map((item) => (
                 <div 
                   key={item.id} 
-                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg transition-all duration-500 
+                  className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg transition-all duration-500 flex items-center justify-center
                     ${item.isCenter 
                       ? 'scale-[1.15] sm:scale-125 z-20 border-4 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.5)]' 
                       : 'z-10 hover:scale-105 hover:z-30 opacity-80 hover:opacity-100 border border-white/20'
                     }`}
                 >
                   <img 
-                    src={item.src.startsWith('http') ? item.src : `./${item.src}`} 
+                    src={`./${item.src}`} 
                     alt={`Fotoğraf ${item.id}`} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://via.placeholder.com/400x400/1e293b/ffffff?text=Resim+" + item.id;
+                      e.target.style.display = 'none'; 
+                      e.target.nextElementSibling.style.display = 'flex';
                     }}
                   />
+                  <div className="hidden flex-col items-center justify-center text-center p-2 z-0 bg-slate-800 absolute inset-0 rounded-2xl">
+                    <span className="text-red-400 text-2xl mb-1">⚠️</span>
+                    <span className="text-white text-xs font-bold">{item.src}<br/>Bulunamadı</span>
+                  </div>
                 </div>
               ))}
             </div>
